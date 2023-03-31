@@ -1,5 +1,10 @@
 const { app, BrowserWindow, ipcMain } = require("electron")
 const path = require("path")
+// const lsbRelease = require("lsb-release")
+
+// lsbRelease(function (_, data) {
+//   console.log(data);
+// });
 
 function createWindow () {
   const win = new BrowserWindow({
@@ -11,10 +16,9 @@ function createWindow () {
     }
   })
 
-  win.loadFile("./html/index.html")
-
-  // function controlWindow() {
+  win.loadFile("./src/html/index.html")
     ipcMain.on("windowControl", (_event, data) => {
+      console.log(data);
       switch (data) {
         case "minimize":
           win.minimize()
@@ -33,7 +37,6 @@ function createWindow () {
           break;
       }
     })
-// }
 }
 
 app.whenReady().then(() => {
