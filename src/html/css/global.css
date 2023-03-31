@@ -1,0 +1,9 @@
+.window-frame {
+    -webkit-app-region: drag;
+}
+
+.window-button, .window-button:active, .window-button:focus, .window-button:hover {
+    -webkit-app-region: no-drag;
+    border: none !important;
+    outline: none !important;
+}

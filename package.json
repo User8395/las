@@ -1,0 +1,35 @@
+{
+  "name": "las",
+  "version": "0.0.0",
+  "description": "The Linux App Store",
+  "main": "./src/main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/User8395/las.git"
+  },
+  "author": "Qasim Khan",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/User8395/las/issues"
+  },
+  "homepage": "https://github.com/User8395/las#readme",
+  "devDependencies": {
+    "babel-plugin-transform-async-to-generator": "^6.24.1",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "electron-forge": "^5.2.4",
+    "electron-prebuilt-compile": "8.2.0"
+  },
+  "dependencies": {
+    "electron-compile": "^6.4.4",
+    "electron-squirrel-startup": "^1.0.0"
+  },
+  "config": {
+    "forge": "./forge.config.js"
+  }
+}
