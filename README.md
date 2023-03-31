@@ -17,4 +17,4 @@ npm run make
 The `.deb` package will then be located in the `out/` folder.
 
 ### Development
-LAS development just started, so I might take a while for the first public beta to be released.
+LAS development just started, so it might take a while for the first public beta to be released.
