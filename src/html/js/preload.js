@@ -1,6 +1,6 @@
-const { contextBridge, ipcRenderer } = require("electron")
+const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("windowControl", {
-    send: (data) => ipcRenderer.send("windowControl", data),
-    receive: (data) => ipcRenderer.on("isMaximized", data)
-})
+  send: (data) => ipcRenderer.send("windowControl", data),
+  receive: (data) => ipcRenderer.on("isMaximized", data),
+});
