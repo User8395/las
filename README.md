@@ -14,7 +14,7 @@ npm install
 npm run make
 ```
 
-The `.deb` package will then be located in the `out/` folder.
+The AppImage will then be located in the `dist/` folder.
 
 ## Updates (bottom to top)
 
