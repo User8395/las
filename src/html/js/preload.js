@@ -6,6 +6,6 @@ contextBridge.exposeInMainWorld("windowControl", {
 });
 
 contextBridge.exposeInMainWorld("apps", {
-  send: () => ipcRenderer.send("getApps"),
+  get: () => ipcRenderer.send("getApps"),
   receive: (data) => ipcRenderer.on("apps", data)
 })

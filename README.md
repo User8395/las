@@ -16,5 +16,19 @@ npm run make
 
 The `.deb` package will then be located in the `out/` folder.
 
-## Development
-LAS development just started, so it might take a while for the first public beta to be released.
+## Updates (bottom to top)
+
+### April 27, 2023
+#### Added
++ On every launch, data will be downloaded from [my example repository](https://github.com/User8395/example-las-source). The only way to override this is to remove the entry from `~/.las/sources.json`.
+- The sourcefiles folder will also be removed. 
+
+### April 5, 2023
+#### Added
++ "Loading sources..." screen
+
++ "App info" screen
+
++ On the first startup, LAS will now make a folder called `.las` located in the user's home folder (`~/` or `/home/user/`)
+
+- `.las` will contain a sources file, an installed apps file, an apps folder, and a sourcefiles folder containing the `info.json` and `apps.json` files of sources.

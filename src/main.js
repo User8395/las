@@ -1,21 +1,57 @@
 // Function Imports (DO NOT MODIFY)
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
-const { mkdirSync, rmdirSync, readFileSync, writeFileSync, existsSync } = require("fs")
-const homedir = require("os").homedir()
-const { execSync } = require("child_process")
+const {
+  mkdirSync,
+  rmdirSync,
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  unlinkSync,
+  renameSync,
+} = require("fs");
+const { execSync } = require("child_process");
+const lasdir = require("os").homedir() + "/.las";
 
-if (!existsSync(homedir + "/.las/")) {
-  mkdirSync(homedir + ".las/")
-  mkdirSync(homedir + ".las/apps/")
-  writeFileSync(homedir + ".las/sources.json", {
-    "hello-world": "na"
-  })
-  writeFileSync(homedir + ".las/installed.json", {})
+if (!existsSync(`${lasdir}`)) {
+  mkdirSync(`${lasdir}`);
+  mkdirSync(`${lasdir}/apps/`);
+  mkdirSync(`${lasdir}/sourcefiles/`);
+  mkdirSync(`${lasdir}/temp/`);
+  writeFileSync(
+    `${lasdir}/sources.json`,
+    JSON.stringify(
+      {
+        sources: ["https://github.com/User8395/example-las-source"],
+      },
+      null,
+      2
+    )
+  );
+  writeFileSync(`${lasdir}/installed.json`, JSON.stringify({}, null, 2));
+  writeFileSync(`${lasdir}/applist.json`, JSON.stringify({}, null, 2));
 }
 
-function getPackages() {
-  
+function getApps() {
+  let sourcesFile = JSON.parse(readFileSync(`${lasdir}/sources.json`));
+  let sources = sourcesFile.sources;
+  rmdirSync(`${lasdir}/sourcefiles`, { recursive: true, force: true });
+  mkdirSync(`${lasdir}/sourcefiles`);
+  for (let i = 1; i <= sources.length; i++) {
+    execSync(`git clone ${sources[i - 1]} ${lasdir}/temp/`);
+    unlinkSync(`${lasdir}/temp/LICENSE`);
+    unlinkSync(`${lasdir}/temp/README.md`);
+    mkdirSync(`${lasdir}/sourcefiles/${i}`);
+    renameSync(
+      `${lasdir}/temp/info.json`,
+      `${lasdir}/sourcefiles/${i}/info.json`
+    );
+    renameSync(
+      `${lasdir}/temp/apps.json`,
+      `${lasdir}/sourcefiles/${i}/apps.json`
+    );
+    rmdirSync(`${lasdir}/temp/`, { recursive: true, force: true });
+  }
 }
 
 function createWindow() {
@@ -31,7 +67,6 @@ function createWindow() {
   win.loadFile("./src/html/loading.html");
 
   ipcMain.on("windowControl", (_event, data) => {
-    console.log(data);
     switch (data) {
       case "minimize":
         win.minimize();
@@ -52,7 +87,7 @@ function createWindow() {
   });
 
   ipcMain.on("getApps", (_event) => {
-    win.webContents.send("packages", getPackages());
+    win.webContents.send("apps", getApps());
   });
 }
 
