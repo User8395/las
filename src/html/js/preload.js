@@ -4,3 +4,8 @@ contextBridge.exposeInMainWorld("windowControl", {
   send: (data) => ipcRenderer.send("windowControl", data),
   receive: (data) => ipcRenderer.on("isMaximized", data),
 });
+
+contextBridge.exposeInMainWorld("apps", {
+  send: () => ipcRenderer.send("getApps"),
+  receive: (data) => ipcRenderer.on("apps", data)
+})

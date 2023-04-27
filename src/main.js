@@ -1,6 +1,22 @@
 // Function Imports (DO NOT MODIFY)
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
+const { mkdirSync, rmdirSync, readFileSync, writeFileSync, existsSync } = require("fs")
+const homedir = require("os").homedir()
+const { execSync } = require("child_process")
+
+if (!existsSync(homedir + "/.las/")) {
+  mkdirSync(homedir + ".las/")
+  mkdirSync(homedir + ".las/apps/")
+  writeFileSync(homedir + ".las/sources.json", {
+    "hello-world": "na"
+  })
+  writeFileSync(homedir + ".las/installed.json", {})
+}
+
+function getPackages() {
+  
+}
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -12,7 +28,7 @@ function createWindow() {
     },
   });
 
-  win.loadFile("./src/html/index.html");
+  win.loadFile("./src/html/loading.html");
 
   ipcMain.on("windowControl", (_event, data) => {
     console.log(data);
@@ -35,7 +51,7 @@ function createWindow() {
     }
   });
 
-  ipcMain.on("getPackages", (_event) => {
+  ipcMain.on("getApps", (_event) => {
     win.webContents.send("packages", getPackages());
   });
 }

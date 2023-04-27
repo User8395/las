@@ -7,3 +7,16 @@
     border: none !important;
     outline: none !important;
 }
+
+.app-list {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+.app-list .app-list-item {
+    display: inline-block;
+    float: none;
+}
