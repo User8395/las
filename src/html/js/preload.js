@@ -14,3 +14,8 @@ contextBridge.exposeInMainWorld("appList", {
   get: () => ipcRenderer.send("getAppList"),
   receive: (data) => ipcRenderer.on("appList", data)
 })
+
+contextBridge.exposeInMainWorld("appInfo", {
+  get: (data) => ipcRenderer.send("getAppInfo", data),
+  receive: (data) => ipcRenderer.on("appInfo", data)
+})

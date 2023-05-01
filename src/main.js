@@ -48,7 +48,7 @@ warn("This is a development version of LAS.");
 warn("Please report bugs on GitHub at https://github.com/User8395/las/issues");
 
 function download(url) {
-  execSync(`wget ${url} -P ${lasdir}/temp`, { stdio: "pipe"});
+  execSync(`wget ${url} -P ${lasdir}/temp`, { stdio: "pipe" });
 }
 
 function getSources() {
@@ -115,21 +115,35 @@ function createWindow() {
     }
   });
 
+  ipcMain.on("getSources", (_event) => {
+    win.webContents.send("apps", getSources());
+  });
+
   ipcMain.on("getAppList", function () {
-    let arraylength = JSON.parse(readFileSync(`${lasdir}/sources.json`)).sources.length;
+    let arraylength = JSON.parse(readFileSync(`${lasdir}/sources.json`)).sources
+      .length;
     let allapps = [];
     for (let i = 0; i < arraylength; i++) {
-      let apps = JSON.parse(readFileSync(`${lasdir}/sourcefiles/${i}/apps.json`)).apps
-      log(apps)
+      let apps = JSON.parse(
+        readFileSync(`${lasdir}/sourcefiles/${i}/apps.json`)
+      ).apps;
       apps.forEach(function (item) {
         allapps.push(item);
       });
     }
-    win.webContents.send("appList", allapps)
+    writeFileSync(`${lasdir}/allapps.json`, JSON.stringify(allapps))
+    win.webContents.send("appList", allapps);
   });
 
-  ipcMain.on("getSources", (_event) => {
-    win.webContents.send("apps", getSources());
+  ipcMain.on("getAppInfo", (_event, appName) => {
+    let allapps = JSON.parse(readFileSync(`${lasdir}/allapps.json`))
+    let app;
+    for (let i = 0; i < allapps.length; i++) {
+      if (allapps[i].name = appName) {
+        app = allapps[i]
+      }
+    }
+    win.webContents.send("appInfo", app)
   });
 }
 

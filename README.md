@@ -2,7 +2,7 @@
 The multi-distro app store
 
 ## Installing
-As this is a pre-alpha, this README will be short, and will only cover installation steps for Debian-based systems. Support for other systems will come soon.
+As this is a pre-alpha, this README will be short.
 
 Node.js is required to package LAS.
 
@@ -18,9 +18,14 @@ The AppImage will then be located in the `dist/` folder.
 
 ## Updates (bottom to top)
 
-### March 1, 2023
+### March 1, 2023 (in the evening)
 #### Added
-+ Data from sources will now show up on the main page
++ "App info" screen
+	- Installation capability is coming soon.
+
+### March 1, 2023 (this was right after midnight...)
+#### Added
++ Data from sources will now show up on the main page.
 
 ### April 27, 2023
 #### Added
@@ -30,8 +35,6 @@ The AppImage will then be located in the `dist/` folder.
 ### April 5, 2023
 #### Added
 + "Loading sources..." screen
-
-+ "App info" screen
 
 + On the first startup, LAS will now make a folder called `.las` located in the user's home folder (`~/` or `/home/user/`)
 
