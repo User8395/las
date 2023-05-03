@@ -9,6 +9,12 @@
   <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary window-frame">
       <div class="container-fluid">
+        <button class="btn window-button">
+          <i class="fa-solid fa-rotate-left"></i>
+        </button>
+        <button class="btn window-button" id="queue-button">
+          <i class="fa-solid fa-cloud-arrow-down"></i>
+        </button>
         <button id="minimize" class="btn ms-auto window-button">
           <i class="fa-solid fa-minus"></i>
         </button>
@@ -23,6 +29,34 @@
     <div class="container">
       <h1>All apps</h1>
       <ul class="app-list"></ul>
+    </div>
+    <div class="modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modal title</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body" id="queue">
+            
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+        </div>
+      </div>
     </div>
     <script src="./js/bootstrap.min.js"></script>
     <script src="./js/fontawesome.min.js"></script>

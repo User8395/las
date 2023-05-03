@@ -16,14 +16,28 @@ npm run make
 
 The AppImage will then be located in the `dist/` folder.
 
+To launch LAS for testing, run
+```
+npm run start
+```
+
 ## Updates (bottom to top)
+
+### March 3, 2023
+#### Added
++ You can now queue an app for installation.
++ "Queue" screen, accessible by clicking the download icon in the navbar.
+
+#### Fixed
++ Maximize button doesn't stay the same across pages
+
 
 ### March 1, 2023 (in the evening)
 #### Added
 + "App info" screen
 	- Installation capability is coming soon.
 
-### March 1, 2023 (this was right after midnight...)
+### March 1, 2023 (right after midnight...)
 #### Added
 + Data from sources will now show up on the main page.
 

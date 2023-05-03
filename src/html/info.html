@@ -10,8 +10,17 @@
   <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary window-frame">
       <div class="container-fluid">
-        <button class="btn window-button" onclick="window.location.assign('javascript:history.back()')">
+        <button
+          class="btn window-button"
+          onclick="window.location.assign('javascript:history.back()')"
+        >
           <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <button class="btn window-button">
+          <i class="fa-solid fa-rotate-left"></i>
+        </button>
+        <button class="btn window-button" id="queue-button" data-bs-toggle="modal" data-bs-target="#queue-modal">
+          <i class="fa-solid fa-cloud-arrow-down"></i>
         </button>
         <button id="minimize" class="btn ms-auto window-button">
           <i class="fa-solid fa-minus"></i>
@@ -26,7 +35,38 @@
     </nav>
     <div class="container">
       <h1 id="name"></h1>
+      <div id="get-button"></div>
+      <p></p>
       <p id="description"></p>
+      <p class="text-secondary" id="id"></p>
+    </div>
+    <div class="modal" id="queue-modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Queue</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body" id="queue">
+            
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="button" class="btn btn-primary">Proceed</button>
+          </div>
+        </div>
+      </div>
     </div>
     <script src="./js/bootstrap.min.js"></script>
     <script src="./js/fontawesome.min.js"></script>

@@ -19,3 +19,12 @@ contextBridge.exposeInMainWorld("appInfo", {
   get: (data) => ipcRenderer.send("getAppInfo", data),
   receive: (data) => ipcRenderer.on("appInfo", data)
 })
+
+contextBridge.exposeInMainWorld("queue", {
+  send: (data, extradata) => ipcRenderer.send("queueApp", data, extradata)
+})
+
+contextBridge.exposeInMainWorld("getQueue", {
+  get: () => ipcRenderer.send("getQueue"),
+  receive: (data) => ipcRenderer.on("queue", data)
+})
