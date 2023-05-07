@@ -23,18 +23,30 @@ npm run start
 
 ## Updates (bottom to top)
 
+### March 7, 2023
+#### Added
++ You can now install the Hello World app
+	- Removal capability is next
++ "Performing operations" screen.
+
+#### Changed
++ Comments have been added to the `main.js` file.
+
+#### Fixed
++ App page's "Get" button does not change to "Queued" when the app has been added to queue.
+
 ### March 3, 2023
 #### Added
 + You can now queue an app for installation.
-+ "Queue" screen, accessible by clicking the download icon in the navbar.
++ "Queue" screen, accessible by clicking the download icon in the top bar.
 
 #### Fixed
-+ Maximize button doesn't stay the same across pages
++ Maximize button icon doesn't stay the same across pages
 
 
 ### March 1, 2023 (in the evening)
 #### Added
-+ "App info" screen
++ "App info" screen.
 	- Installation capability is coming soon.
 
 ### March 1, 2023 (right after midnight...)
@@ -48,8 +60,8 @@ npm run start
 
 ### April 5, 2023
 #### Added
-+ "Loading sources..." screen
++ "Loading sources..." screen.
 
-+ On the first startup, LAS will now make a folder called `.las` located in the user's home folder (`~/` or `/home/user/`)
++ On the first startup, LAS will now make a folder called `.las` located in the user's home folder (`~/` or `/home/user/`).
 
 	-  `.las` will contain a sources file, an installed apps file, an apps folder, and a sourcefiles folder containing the `info.json` and `apps.json` files of sources.

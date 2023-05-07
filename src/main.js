@@ -1,10 +1,10 @@
 /*
-  I see you want to take a look at the LAS source code.
-  However, there are no code explanations yet.
-  Your only option is to try and figure out the code manually.
-  Sorry...
+  Linux App Store v0.0.1 pre-alpha
+  Formatted by Prettier for Visual Studio Code
 */
 
+
+// Function Imports
 const { app, BrowserWindow, ipcMain } = require("electron");
 const https = require("https");
 const fs = require("fs");
@@ -15,22 +15,23 @@ const {
   readFileSync,
   writeFileSync,
   existsSync,
-  unlinkSync,
   renameSync,
   appendFileSync,
 } = require("fs");
 const { execSync } = require("child_process");
 const lasdir = require("os").homedir() + "/.las";
 
+// There is an annoying warning in the JavaScript console telling
+// me that the HTML is insecure somehow. This line disables said warning.
 process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
 
+// If ~/.las/ doesn't exist, create it.
 if (!existsSync(`${lasdir}`)) {
-  mkdirSync(`${lasdir}`);
-  mkdirSync(`${lasdir}/apps/`);
-  mkdirSync(`${lasdir}/sourcefiles/`);
-  mkdirSync(`${lasdir}/temp/`);
+  mkdirSync(`${lasdir}`) // Main folder
+  mkdirSync(`${lasdir}/apps/`); // Apps folder
+  mkdirSync(`${lasdir}/sourcefiles/`); // Sourcefiles folder
   writeFileSync(
-    `${lasdir}/sources.json`,
+    `${lasdir}/sources.json`, // Sources JSON file
     JSON.stringify(
       {
         sources: ["https://github.com/User8395/example-las-source"],
@@ -40,7 +41,7 @@ if (!existsSync(`${lasdir}`)) {
     )
   );
   writeFileSync(
-    `${lasdir}/settings.json`,
+    `${lasdir}/settings.json`, // Settings JSON file, currently containing window maximization settings
     JSON.stringify(
       {
         maximized: false,
@@ -49,38 +50,51 @@ if (!existsSync(`${lasdir}`)) {
       2
     )
   );
-  writeFileSync(`${lasdir}/installed.json`, JSON.stringify({}, null, 2));
-  writeFileSync(`${lasdir}/applist.json`, JSON.stringify({}, null, 2));
+  writeFileSync(
+    `${lasdir}/installed.json`, // Installed apps JSON file
+    JSON.stringify(
+      {
+        installed: [],
+      },
+      null,
+      2
+    )
+  );
+  writeFileSync(`${lasdir}/applist.json`, JSON.stringify({}, null, 2)); // Available apps JSON file
 }
 
-function info(val) {
+// Functions for logging to ~/las/log.txt
+
+function info(val) { // Information
   console.log(`INFO ${val}`);
   appendFileSync(`${lasdir}/log.txt`, `INFO ${val}\n`);
 }
-function warn(val) {
+function warn(val) { // Warning
   console.warn(`WARN ${val}`);
   appendFileSync(`${lasdir}/log.txt`, `WARN ${val}\n`);
 }
-function error(val) {
-  console.error(`ERROR ${val}`);
+function error(val) { // Error.
+  new Error(`ERROR ${val}`);
   appendFileSync(`${lasdir}/log.txt`, `ERROR ${val}\n`);
 }
 
-mkdirSync(`${lasdir}/temp`);
+mkdirSync(`${lasdir}/temp`); // Temp folder
 
 info("Starting LAS v0.0.1...");
 warn("This is a development version of LAS.");
 warn("Please report bugs on GitHub at https://github.com/User8395/las/issues");
 
+// Function to download files using `wget`
 function download(url) {
   try {
+    info(`Downloading ${url}...`);
     execSync(`wget ${url} -P ${lasdir}/temp`, { stdio: "pipe" });
   } catch (err) {
-    error("Download failed");
     error(err);
   }
 }
 
+// Creates the main window
 function createWindow() {
   const win = new BrowserWindow({
     width: 800,
@@ -200,8 +214,8 @@ function createWindow() {
     win.webContents.send("appInfo", app);
   });
 
-  ipcMain.on("queueApp", (_event, appName, type) => {
-    info(`Adding ${appName} to queue for ${type}...`);
+  ipcMain.on("queueApp", (_event, appId, type) => {
+    info(`Adding ${appId} to queue for ${type}...`);
     if (existsSync(`${lasdir}/temp/queue.json`)) {
       let queue = readFileSync(`${lasdir}/temp/queue.json`);
       if (type == "install") {
@@ -217,7 +231,7 @@ function createWindow() {
           `${lasdir}/temp/queue.json`,
           JSON.stringify(
             {
-              install: [appName],
+              install: [appId],
             },
             null,
             2
@@ -259,6 +273,61 @@ function createWindow() {
       win.webContents.send("queue", "empty");
     }
   });
+
+  ipcMain.on("performOperations", (_event) => {
+    info("Performing operations...");
+    let queue = JSON.parse(readFileSync(`${lasdir}/temp/queue.json`));
+    let sources = JSON.parse(readFileSync(`${lasdir}/sources.json`)).sources;
+    let installed = JSON.parse(
+      readFileSync(`${lasdir}/installed.json`)
+    ).installed;
+    if (queue.remove) {
+      info("Removing apps...");
+      for (let i = 0; i < queue.remove.length; i++) {
+        let appName = queue.removing[i].split("/").shift();
+        for (let i2 = 0; i2 < sources.length; i2++) {
+          let apps = JSON.parse(
+            readFileSync(`${lasdir}/sourcefiles/${i2}/apps.json`)
+          ).apps;
+          for (let i3 = 0; i3 < apps.length; i3++) {
+            if (apps[i3] == queue.remove[i]) {
+            }
+          }
+        }
+      }
+    }
+    if (queue.upgrade) {
+      //TODO
+    }
+    if (queue.install) {
+      info("Installing apps...");
+      for (let i = 0; i < queue.install.length; i++) {
+        let appName = queue.install[i].split("/").pop();
+        for (let i2 = 0; i2 < sources.length; i2++) {
+          let apps = JSON.parse(
+            readFileSync(`${lasdir}/sourcefiles/${i2}/apps.json`)
+          ).apps;
+          for (let i3 = 0; i3 < apps.length; i3++) {
+            if (apps[i3].id == queue.install[i]) {
+              info(`Downloading ${appName}`)
+              if (sources[i2].indexOf("github") > -1) {
+                download(`${sources[i2]}/raw/master/apps/${appName}.lapp`);
+              } else {
+                download(`${sources[i2]}/apps/${appName}.lapp`);
+              }
+              info(`Installing ${appName}`)
+              execSync(`unzip ${lasdir}/temp/${appName}.lapp -d ${lasdir}/apps/${appName}`)
+              installed.push(appName);
+              writeFileSync(`${lasdir}/apps.json`, JSON.stringify(installed));
+
+            }
+          }
+        }
+      }
+    }
+    info("Returning to menu...")
+    win.loadFile("./src/html/index.html")
+  });
 }
 
 app.whenReady().then(() => {
@@ -276,12 +345,6 @@ app.whenReady().then(() => {
 app.on("window-all-closed", () => {
   info("Quitting LAS...");
   rmdirSync(`${lasdir}/temp/`, { recursive: true, force: true });
-  info("Clearing queue...");
-  try {
-    unlinkSync(`${lasdir}/temp/queue.json`);
-  } catch (err) {
-    info("Queue doesn't exist, skipping...");
-  }
   if (process.platform !== "darwin") {
     app.quit();
   }

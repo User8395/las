@@ -28,3 +28,7 @@ contextBridge.exposeInMainWorld("getQueue", {
   get: () => ipcRenderer.send("getQueue"),
   receive: (data) => ipcRenderer.on("queue", data)
 })
+
+contextBridge.exposeInMainWorld("performOperations", {
+  send: () => ipcRenderer.send("performOperations")
+})

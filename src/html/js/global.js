@@ -6,27 +6,41 @@ window.getQueue.receive(function (_event, currqueue) {
     $("#queue-button").show();
     if (window.location.href.includes("info")) {
       for (let i = 0; i < currqueue.install.length; i++) {
-        if (currqueue.install[i] == window.localStorage.getItem("appName")) {
+        if (currqueue.install[i] == window.localStorage.getItem("appId")) {
           $("#get-button").html(
-            `<button class="btn btn-primary float-end" onclick="openQueue()">Queued</button>`
+            `<button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#queue-modal">Queued</button>`
           );
-        } else if (currqueue.remove[i] == window.localStorage.getItem("appName")) {
+        } else if (currqueue.remove[i] == window.localStorage.getItem("appId")) {
           $("#get-button").html(
-            `<button class="btn btn-primary float-end" onclick="openQueue()">Queued</button>`
+            `<button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#queue-modal">Queued</button>`
           );
-        } else if (currqueue.upgrade[i] == window.localStorage.getItem("appName")) {
+        } else if (currqueue.upgrade[i] == window.localStorage.getItem("appId")) {
           $("#get-button").html(
-            `<button class="btn btn-primary float-end" onclick="openQueue()">Queued</button>`
+            `<button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#queue-modal">Queued</button>`
           );
         }
       }
     }
   }
   if (currqueue.install) {
-    $("#queue").append("<h3>Install</h1>");
+    $("#queue").append("<h5>Install</h1>");
     $("#queue").append("<ul>");
     for (let i = 0; i < currqueue.install.length; i++) {
       $("#queue").append(`<li>${currqueue.install[i]}</li>`);
+    }
+    $("#queue").append("</ul>");
+  } else if (currqueue.remove) {
+    $("#queue").append("<h5>Remove</h1>");
+    $("#queue").append("<ul>");
+    for (let i = 0; i < currqueue.remove.length; i++) {
+      $("#queue").append(`<li>${currqueue.remove[i]}</li>`);
+    }
+    $("#queue").append("</ul>");
+  } else if (currqueue.upgrade) {
+    $("#queue").append("<h5>Upgrade</h1>");
+    $("#queue").append("<ul>");
+    for (let i = 0; i < currqueue.upgrade.length; i++) {
+      $("#queue").append(`<li>${currqueue.upgrade[i]}</li>`);
     }
     $("#queue").append("</ul>");
   }
