@@ -27,7 +27,7 @@ npm run start
 #### Added
 + You can now remove apps, as long as they are in the `installed.json` file.
 + If no Internet connection is detected, you will be notified with the `nointernet.html` file.
-	- Still working on it. May not work as intended
+	- Still working on it. May not work as intended.
 
 #### Changed
 + More comments have been added to the `main.js` file
