@@ -5,19 +5,33 @@ window.getQueue.receive(function (_event, currqueue) {
   } else {
     $("#queue-button").show();
     if (window.location.href.includes("info")) {
-      for (let i = 0; i < currqueue.install.length; i++) {
-        if (currqueue.install[i] == window.localStorage.getItem("appId")) {
-          $("#get-button").html(
-            `<button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#queue-modal">Queued</button>`
-          );
-        } else if (currqueue.remove[i] == window.localStorage.getItem("appId")) {
-          $("#get-button").html(
-            `<button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#queue-modal">Queued</button>`
-          );
-        } else if (currqueue.upgrade[i] == window.localStorage.getItem("appId")) {
-          $("#get-button").html(
-            `<button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#queue-modal">Queued</button>`
-          );
+      if (currqueue.install) {
+        for (let i = 0; i < currqueue.install.length; i++) {
+          if (currqueue.install[i] == window.localStorage.getItem("appId")) {
+            setTimeout(() => {
+              $("#get-button").html(
+                `<button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#queue-modal">Queued</button>`
+              );
+            }, 1);
+          }
+        }
+      } else if (currqueue.remove) {
+        for (let i = 0; i < currqueue.remove.length; i++) {
+          if (currqueue.remove[i] == window.localStorage.getItem("appId")) {
+            setTimeout(() => {
+              $("#get-button").html(
+                `<button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#queue-modal">Queued</button>`
+              );
+            }, 1);
+          }
+        }
+      } else if (currqueue.upgrade) {
+        if (currqueue.upgrade[i] == window.localStorage.getItem("appId")) {
+          setTimeout(() => {
+            $("#get-button").html(
+              `<button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#queue-modal">Queued</button>`
+            );
+          }, 1);
         }
       }
     }

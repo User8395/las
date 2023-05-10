@@ -21,7 +21,17 @@ To launch LAS for testing, run
 npm run start
 ```
 
-## Updates (bottom to top)
+## Updates (bottom to top, top being latest)
+
+### March 10, 2023
+#### Added
++ You can now remove apps, as long as they are in the `installed.json` file.
++ If no Internet connection is detected, you will be notified with the `nointernet.html` file.
+	- Still working on it. May not work as intended
+
+#### Changed
++ More comments have been added to the `main.js` file
++ LAS now depends on `check-internet-connected`. Run `npm install` to satisfy all dependencies.
 
 ### March 7, 2023
 #### Added
@@ -30,7 +40,7 @@ npm run start
 + "Performing operations" screen.
 
 #### Changed
-+ Comments have been added to the `main.js` file.
++ Some comments have been added to the `main.js` file.
 
 #### Fixed
 + App page's "Get" button does not change to "Queued" when the app has been added to queue.

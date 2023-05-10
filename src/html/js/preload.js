@@ -20,14 +20,20 @@ contextBridge.exposeInMainWorld("appInfo", {
   receive: (data) => ipcRenderer.on("appInfo", data)
 })
 
-contextBridge.exposeInMainWorld("queue", {
-  send: (data, extradata) => ipcRenderer.send("queueApp", data, extradata)
-})
-
 contextBridge.exposeInMainWorld("getQueue", {
   get: () => ipcRenderer.send("getQueue"),
   receive: (data) => ipcRenderer.on("queue", data)
 })
+
+contextBridge.exposeInMainWorld("installed", {
+  get: () => ipcRenderer.send("getInstalled"),
+  receive: (data) => ipcRenderer.on("installedApps", data)
+})
+
+contextBridge.exposeInMainWorld("queue", {
+  send: (data, extradata) => ipcRenderer.send("queueApp", data, extradata)
+})
+
 
 contextBridge.exposeInMainWorld("performOperations", {
   send: () => ipcRenderer.send("performOperations")
