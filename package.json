@@ -1,6 +1,6 @@
 {
   "name": "las",
-  "version": "0.0.1",
+  "version": "0.0-prealpha",
   "description": "The Linux App Store",
   "main": "./src/main.js",
   "scripts": {

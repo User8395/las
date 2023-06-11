@@ -25,8 +25,8 @@ window.getQueue.receive(function (_event, currqueue) {
             }, 1);
           }
         }
-      } else if (currqueue.upgrade) {
-        if (currqueue.upgrade[i] == window.localStorage.getItem("appId")) {
+      } else if (currqueue.update) {
+        if (currqueue.update[i] == window.localStorage.getItem("appId")) {
           setTimeout(() => {
             $("#get-button").html(
               `<button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#queue-modal">Queued</button>`
@@ -50,11 +50,11 @@ window.getQueue.receive(function (_event, currqueue) {
       $("#queue").append(`<li>${currqueue.remove[i]}</li>`);
     }
     $("#queue").append("</ul>");
-  } else if (currqueue.upgrade) {
-    $("#queue").append("<h5>Upgrade</h1>");
+  } else if (currqueue.update) {
+    $("#queue").append("<h5>Update</h1>");
     $("#queue").append("<ul>");
-    for (let i = 0; i < currqueue.upgrade.length; i++) {
-      $("#queue").append(`<li>${currqueue.upgrade[i]}</li>`);
+    for (let i = 0; i < currqueue.update.length; i++) {
+      $("#queue").append(`<li>${currqueue.update[i]}</li>`);
     }
     $("#queue").append("</ul>");
   }

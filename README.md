@@ -21,7 +21,20 @@ To launch LAS for testing, run
 npm run start
 ```
 
-## Updates (bottom to top, top being latest)
+
+## Updates (bottom to top, top being latest and bottom being oldest)
+
+### DISCLAIMER
+The below list may not contain everything that was added, removed, changed, or fixed on the date specified. All changes can be seen in the files' "Blame" section.
+
+### June 11, 2023
+#### Added
++ Apps can now be updated
+	- This has not been tested yet.
+	- LAS cannot yet check if an app need an update. That is expected to come in the next commit.
+
+#### Changed
++ The `package.json` version field has been changed to 0.0-prealpha
 
 ### March 10, 2023
 #### Added
@@ -65,7 +78,7 @@ npm run start
 
 ### April 27, 2023
 #### Added
-+ On every launch, data will be downloaded from [my example repository](https://github.com/User8395/example-las-source). The only way to override this is to remove the entry from `~/.las/sources.json`.
++ On every launch, data will be downloaded from [the example repository](https://github.com/User8395/example-las-source). The only way to override this is to remove the entry from `~/.las/sources.json`.
 	- The sourcefiles folder will also be removed on every launch.
 
 ### April 5, 2023
