@@ -27,6 +27,22 @@ npm run start
 ### DISCLAIMER
 The below list may not contain everything that was added, removed, changed, or fixed on the date specified. All changes can be seen in the files' "Blame" section.
 
+This section will be removed when the first alpha is available.
+
+### August 4, 2023
+#### Fixed
++ Checking the info of another app shows info from the last app in `applist.json`
++ Can't install multiple apps at the same time
+
+#### Changed
++ The `package.json` version field has been changed to 0.0.0-prealpha
++ Writing app list to `applist.json` is now done after loading source
++ LAS now using the NodeJS's `dns` module for Internet connectivity checking
+
+#### Dependency changes
++ Removed `internet-available`
++ Removed `is-online`
+
 ### June 11, 2023
 #### Added
 + Apps can now be updated
@@ -44,7 +60,9 @@ The below list may not contain everything that was added, removed, changed, or f
 
 #### Changed
 + More comments have been added to the `main.js` file
-+ LAS now depends on `check-internet-connected`. Run `npm install` to satisfy all dependencies.
+
+#### Dependency changes
++ Added `check-internet-connected`
 
 ### March 7, 2023
 #### Added
@@ -65,7 +83,6 @@ The below list may not contain everything that was added, removed, changed, or f
 
 #### Fixed
 + Maximize button icon doesn't stay the same across pages
-
 
 ### March 1, 2023 (in the evening)
 #### Added

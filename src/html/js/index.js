@@ -1,3 +1,5 @@
+window.localStorage.clear()
+
 window.appList.get()
 window.appList.receive((_event, appList) => {
   for (let i = 0; i < appList.length; i++) {

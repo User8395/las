@@ -21,14 +21,17 @@
       </div>
     </nav>
     <div class="container">
-      <h1>Failed to fetch sources</h1>
+      <h1>No Internet connection</h1>
       <p>Please check your Internet connection and try again</p>
-      <button class="btn btn-primary" onclick="window.location.assign('./loading.html')">Retry</button>
+      <button class="btn btn-primary" id="restart">Restart</button>
     </div>
     <script src="./js/bootstrap.min.js"></script>
     <script src="./js/fontawesome.min.js"></script>
     <script src="./js/jquery.min.js"></script>
-    <script src="./js/global.js"></script>
-    <script src="./js/index.js"></script>
+    <script>
+      $("#restart").click(function () {
+        window.restart.send()
+      })
+    </script>
   </body>
 </html>
