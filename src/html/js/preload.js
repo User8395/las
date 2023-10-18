@@ -1,7 +1,11 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("restart", {
-  send: (data) => ipcRenderer.send("restart")
+  send: () => ipcRenderer.send("restart")
+})
+
+contextBridge.exposeInMainWorld("log", {
+  send: (data1, data2) => ipcRenderer.send("rendererLog", data1, data2)
 })
 
 contextBridge.exposeInMainWorld("windowControl", {
@@ -9,14 +13,9 @@ contextBridge.exposeInMainWorld("windowControl", {
   receive: (data) => ipcRenderer.on("isMaximized", data),
 });
 
-contextBridge.exposeInMainWorld("sources", {
-  get: () => ipcRenderer.send("getSources"),
-  receive: (data) => ipcRenderer.on("apps", data)
-})
-
-contextBridge.exposeInMainWorld("appList", {
-  get: () => ipcRenderer.send("getAppList"),
-  receive: (data) => ipcRenderer.on("appList", data)
+contextBridge.exposeInMainWorld("index", {
+  get: () => ipcRenderer.send("downloadIndex"),
+  receive: (data) => ipcRenderer.on("index", data)
 })
 
 contextBridge.exposeInMainWorld("appInfo", {

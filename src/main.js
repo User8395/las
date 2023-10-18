@@ -4,12 +4,10 @@
 
 // Function Imports
 const { app, BrowserWindow, ipcMain } = require("electron");
-const https = require("https");
-const fs = require("fs");
 const path = require("path");
 const {
   mkdirSync,
-  rmdirSync,
+  rmSync,
   readFileSync,
   writeFileSync,
   existsSync,
@@ -17,24 +15,13 @@ const {
   appendFileSync,
 } = require("fs");
 const { execSync } = require("child_process");
-const downloader = require("download");
-const lasdir = require("os").homedir() + "/.las";
+const homedir = require("os").homedir()
+const lasdir = homedir + "/.las";
 
 // If ~/.las/ doesn't exist, create it.
 if (!existsSync(`${lasdir}`)) {
   mkdirSync(`${lasdir}`); // Main folder
   mkdirSync(`${lasdir}/apps/`); // Apps folder
-  mkdirSync(`${lasdir}/sourcefiles/`); // Sourcefiles folder
-  writeFileSync(
-    `${lasdir}/sources.json`, // Sources JSON file
-    JSON.stringify(
-      {
-        sources: ["https://github.com/User8395/example-las-source"],
-      },
-      null,
-      2
-    )
-  );
   writeFileSync(
     `${lasdir}/settings.json`, // Settings JSON file, currently containing window maximization settings
     JSON.stringify(
@@ -61,17 +48,17 @@ if (!existsSync(`${lasdir}`)) {
 // Functions for logging to ~/.las/log.txt
 function info(val) {
   // Information
-  console.log(`INFO ${val}`);
+  console.log(`[Server/INFO] ${val}`);
   appendFileSync(`${lasdir}/log.txt`, `INFO ${val}\n`);
 }
 function warn(val) {
   // Warning
-  console.warn(`WARN ${val}`);
+  console.warn(`[Server/WARN] ${val}`);
   appendFileSync(`${lasdir}/log.txt`, `WARN ${val}\n`);
 }
 function error(val) {
   // Error
-  new Error(`ERROR ${val}`);
+  console.error(`[Server/ERROR] ${val}`);
   appendFileSync(`${lasdir}/log.txt`, `ERROR ${val}\n`);
 }
 
@@ -80,7 +67,7 @@ mkdirSync(`${lasdir}/temp`); // Create temp folder
 info("Starting LAS v0.0.0...");
 warn("============================= WARNING ================================");
 warn("This is a development version of LAS.");
-warn("Please report bugs on GitHub at https://github.com/User8395/las/issues.");
+warn("Please report bugs on GitHub at https://github.com/User8395/las/issues");
 warn("======================================================================");
 
 // Function to download files using `wget`
@@ -91,6 +78,7 @@ function download(url) {
   } catch (err) {
     error(err);
   }
+  info(`Download complete`)
 }
 
 // Creates the main window
@@ -112,14 +100,32 @@ function createWindow() {
     win.maximize(); // Maximize if it was
   }
 
+  // Check if there is an Internet connection
   require("dns").resolve("www.google.com", function (err) {
     if (err) {
+      // If there isn't, show an error
+      error("No internet connnection")
       win.loadFile("./src/html/nointernet.html");
     }
   });
 
-  // Load the "Loading sources..." screen
+  // Show the "Loading app index..." screen
   win.loadFile("./src/html/loading.html");
+
+  // Renderer logs
+  ipcMain.on("rendererLog", (_event, level, log) => {
+    switch (level) {
+      case info:
+        info(log)
+        break;
+      case warn:
+        warn(log)
+        break;
+      case error:
+        error(log)
+        break;
+    }
+  });
 
   // Relaunching
   ipcMain.on("restart", (_event) => {
@@ -166,86 +172,42 @@ function createWindow() {
     }
   });
 
-  // Get source data
-  ipcMain.on("getSources", (_event) => {
-    info("Loading sources...");
-    let sources = JSON.parse(readFileSync(`${lasdir}/sources.json`)).sources; // Read ~/.las/sources.json
+  // Download the app index
+  ipcMain.on("downloadIndex", () => {
+    info("Loading app index...");
     let installed = JSON.parse(
       readFileSync(`${lasdir}/installed.json`)
     ).installed;
-    info("Removing old sourcefiles...");
-    rmdirSync(`${lasdir}/sourcefiles`, { recursive: true, force: true }); // Remove old sourcefiles
-    mkdirSync(`${lasdir}/sourcefiles`); // Re-create sourcefiles folder
-    info("Downloading sourcefiles...");
-    for (let i = 0; i < sources.length; i++) {
-      if (sources[i].indexOf("github") > -1) {
-        // If the source is a GitHub repository...
-        download(`${sources[i]}/raw/master/info.json`); // ..download the raw info.json...
-        download(`${sources[i]}/raw/master/apps.json`); // .. and the raw apps.json
-      } else {
-        // If the source is something else...
-        download(`${sources[i]}/info.json`); // ...directly download info.json...
-        download(`${sources[i]}/apps.json`); // ...and apps.json
-      }
-      info("Moving new sourcefiles...");
-      mkdirSync(`${lasdir}/sourcefiles/${i}`); // Create a folder for the downloaded files
-      renameSync(
-        // Move info.json
-        `${lasdir}/temp/info.json`,
-        `${lasdir}/sourcefiles/${i}/info.json`
-      );
-      renameSync(
-        // Move apps.json
-        `${lasdir}/temp/apps.json`,
-        `${lasdir}/sourcefiles/${i}/apps.json`
-      );
-      // Restart this process if there are more sources
-    }
+    download(`https://github.com/User8395/lai/raw/master/index.json`); // Download the app index file
+    info("Moving index file...");
+    renameSync(
+      `${lasdir}/temp/index.json`,
+      `${lasdir}/index.json`
+    );
 
     // Check if there are newer versions of apps available
     // for (let i = 0; i < installed.length; i++) {
-    //   for (let i2 = 0; i2 < sources.length; i2++) {
+    //   for (let i2 = 0; i2 < index.length; i2++) {
     //     let apps = readFileSync(`${lasdir}/sourcefiles/${i2}/apps.json`)
 
     //   }
     // }
 
-    let arraylength = sources
-      .length; // Length of sources.json
-    let applist = []; // Declare applist variable
-    for (let i = 0; i < arraylength; i++) {
-      let apps = JSON.parse(
-        readFileSync(`${lasdir}/sourcefiles/${i}/apps.json`) // Read source's apps.json
-      ).apps;
-      apps.forEach(function (item) {
-        console.log(item);
-        applist.push(item); // Add app to applist
-      });
-    }
-    info("Writing app list...");
-    console.log(applist);
-    writeFileSync(`${lasdir}/applist.json`, JSON.stringify(applist, null, 2)); // Write app list to ~/.las/applist.json
-
-    rmdirSync(`${lasdir}/temp/`, { recursive: true, force: true }); // Remove temp folder
+    var index = JSON.parse(readFileSync(`${lasdir}/index.json`)).apps
+    rmSync(`${lasdir}/temp/`, { recursive: true, force: true }); // Remove temp folder
     mkdirSync(`${lasdir}/temp/`); // Re-create temp folder
-    win.webContents.send("apps"); // Tell renderer that source loading is done
-  });
-
-  // Get the list of apps
-  ipcMain.on("getAppList", function () {
-    var applist = JSON.parse(readFileSync(`${lasdir}/applist.json`))
-    win.webContents.send("appList", applist); // Send app list to renderer
+    win.webContents.send("index", index); // Tell renderer that index loading is done
   });
 
   // Get the info of an app
   ipcMain.on("getAppInfo", (_event, appName) => {
     info(`Getting info of app ${appName}...`);
-    let applist = JSON.parse(readFileSync(`${lasdir}/applist.json`)); // Read applist.json
+    let index = JSON.parse(readFileSync(`${lasdir}/index.json`)).apps; // Read app index
     let app; // Empty declaration
-    for (let i = 0; i < applist.length; i++) {
-    // If the name of the app is in applist.json...
-      if ((applist[i].name === appName)) {
-        app = applist[i]; // Set value variable `app` to the requested app's info
+    for (let i = 0; i < index.length; i++) {
+      // If the name of the app is in the app index...
+      if (appName === index[i].name) {
+        app = index[i]; // Set value variable `app` to the requested app's info
         break
       }
     }
@@ -272,7 +234,7 @@ function createWindow() {
     } else {
       // If the queue file doesn't exist...
       if (type == "install") {
-        // If the app is supposed to be installed...
+        // ...and if the app is supposed to be installed...
         writeFileSync(
           // ...create the queue file and add the app for installation
           `${lasdir}/temp/queue.json`,
@@ -285,7 +247,7 @@ function createWindow() {
           )
         );
       } else if (type == "remove") {
-        // If the app is supposed to be removed...
+        // ...and if the app is supposed to be removed...
         writeFileSync(
           // ...create the queue file and add the app for removal
           `${lasdir}/temp/queue.json`,
@@ -340,7 +302,6 @@ function createWindow() {
   ipcMain.on("performOperations", (_event) => {
     info("Performing operations...");
     let queue = JSON.parse(readFileSync(`${lasdir}/temp/queue.json`)); // Read queue file
-    let sources = JSON.parse(readFileSync(`${lasdir}/sources.json`)).sources; // Read sources file
     let installed = JSON.parse(
       readFileSync(`${lasdir}/installed.json`) // Read installed apps file
     ).installed;
@@ -349,18 +310,12 @@ function createWindow() {
       info(`Removing ${queue.remove.length} app(s)`);
       for (let i = 0; i < queue.remove.length; i++) {
         // ...loop through the removal queue
-        let appName = queue.remove[i].split("/").pop(); // Read app name
-        for (let i2 = 0; i2 < installed.length; i2++) {
-          if (installed[i2] == queue.remove[i]) {
-            // If app name is in the queue...
-            info(`Removing ${appName}...`);
-            rmdirSync(`${lasdir}/apps/${appName}`, {
-              // Remove the app
-              recursive: true,
-              force: true,
-            });
-            installed.splice(installed.indexOf(queue.remove[i]), 1); // Remove the app from the installed list
-          }
+        info(`Removing app ${i + 1}/${queue.remove.length}`)
+        var app = JSON.parse(readFileSync(`${lasdir}/apps/${queue.remove[i]}/app.json`))
+        if (app.install == "user") {
+          rmSync(`${lasdir}/apps/${queue.remove[i]}`, { recursive: true, force: true })
+          rmSync(`${homedir}/.local/share/applications/${queue.remove[i]}.desktop`)
+          installed.splice(installed.indexOf(queue.remove[i]), 1); // Remove the app from the installed list
         }
         writeFileSync(
           // Save to installed apps file
@@ -379,108 +334,54 @@ function createWindow() {
       // If there are updates queued
       info(`Updating ${queue.update.length} app(s)...`);
       for (let i = 0; i < queue.update.length; i++) {
-        // ...loop through the update queue
-        let appName = queue.update[i].split("/").pop(); // Read app name
-        for (let i2 = 0; i2 < sources.length; i2++) {
-          let downloaded = [];
-          let apps = JSON.parse(
-            readFileSync(`${lasdir}/sourcefiles/${i2}/apps.json`)
-          ).apps;
-          for (let i3 = 0; i3 < apps.length; i3++) {
-            if (apps[i3].id == queue.update[i]) {
-              // If app name is in the queue...
-              info(`Downloading ${appName} v${apps[i3].version}...`);
-              if (sources[i2].indexOf("github") > -1) {
-                // ...and if the source is a GitHub repository...
-                download(
-                  `${sources[i2]}/raw/master/apps/${appName}-${apps[i3].version}.lapp`
-                ); // ...download the raw GitHub file
-              } else {
-                // ...otherwise...
-                download(
-                  `${sources[i2]}/apps/${appName}-${apps[i3].version}.lapp`
-                ); // ...download the app regularly
-              }
-              downloaded.push(`${appName}-${apps[i3].version}`); // Add app to queue for later updating
-            }
-            for (let i = 0; i < downloaded.length; i++) {
-              // Loop through the downloaded apps
-              info(`Updating ${downloaded[i][0]} to ${downloaded[i][1]}`);
-              execSync(
-                `unzip ${lasdir}/temp/${downloaded[i]}.lapp -fd ${lasdir}/apps/${downloaded[i]}` // Extract updated app to ~/.las/apps/ without modifying user data
-              );
-            }
-          }
-        }
+        error("Updates currently cannot be done")
       }
     }
     if (queue.install) {
       // If there are installs queued...
-      info(`Installing ${queue.install.length} app(s)...`);
+      for (let i = 0; i < queue.install.length; i++) { // ...loop through the install queue
+        mkdirSync(`${lasdir}/temp/${queue.install[i]}/`)
+        info(`Downloading app ${i + 1}/${queue.install.length}`)
+        download(`https://github.com/User8395/lai/raw/master/${queue.install[i]}/app.json`)
+        renameSync(`${lasdir}/temp/app.json`, `${lasdir}/temp/${queue.install[i]}/app.json`)
+        var app = JSON.parse(readFileSync(`${lasdir}/temp/${queue.install[i]}/app.json`))
+        download(`https://github.com/User8395/lai/raw/master/${queue.install[i]}/latest/${queue.install[i]}.lapp.zip`)
+      }
+      info(`All downloads complete`)
       for (let i = 0; i < queue.install.length; i++) {
-        // ...loop through the install queue
-        let appName = queue.install[i].split("/").pop(); // Read app name
-        for (let i2 = 0; i2 < sources.length; i2++) {
-          // Loop through sources
-          var downloaded = [];
-          let apps = JSON.parse(
-            readFileSync(`${lasdir}/sourcefiles/${i2}/apps.json`)
-          ).apps;
-          for (let i3 = 0; i3 < apps.length; i3++) {
-            // Loop through the install queue to download apps
-            if (apps[i3].id == queue.install[i]) {
-              // If app name is in the queue...
-              info(`Downloading ${appName} v${apps[i3].version}...`);
-              if (sources[i2].indexOf("github") > -1) {
-                // ...and if the source is a GitHub repository...
-                download(
-                  `${sources[i2]}/raw/master/apps/${appName}-${apps[i3].version}.lapp`
-                ); // ...download the raw GitHub file
-              } else {
-                // ...otherwise...
-                download(
-                  `${sources[i2]}/apps/${appName}-${apps[i3].version}.lapp`
-                ); // ...download the app regularly
-              }
-              console.log(appName);
-              console.log(apps[i3].version);
-              downloaded.push(`${appName}-${apps[i3].version}`); // Add app to queue for later installation
-            }
-          }
-          for (let i3 = 0; i3 < downloaded.length; i3++) {
-            // Loop through the downloaded apps list
-            console.log(downloaded.length);
-            console.log(downloaded);
-            info(`Installing ${downloaded[0]}`);
-            execSync(
-              `unzip ${lasdir}/temp/${downloaded[0]}.lapp -d ${lasdir}/apps/${downloaded[0]}` // Extract the app to ~/.las/apps/
-            );
-            installed.push(downloaded[i]); // Add to installed apps list
-          }
+        var app = JSON.parse(readFileSync(`${lasdir}/temp/${queue.install[i]}/app.json`))
+        if (app.install = "user") {
+          info(`${queue.install[i]} (${app.latestVersion}) ${i + 1}/${queue.install.length}`)
+          mkdirSync(`${lasdir}/apps/${queue.install[i]}`)
+          renameSync(`${lasdir}/temp/${queue.install[i]}/app.json`, `${lasdir}/apps/${queue.install[i]}/app.json`)
+          execSync(`unzip ${lasdir}/temp/${queue.install[i]}.lapp.zip -d ${lasdir}/apps/${queue.install[i]}`)
+          execSync(`ln -fs ${lasdir}/apps/${queue.install[i]}/${app.desktopFile} ${homedir}/.local/share/applications/${app.desktopFile}`)
         }
+        installed.push(queue.install[i])
       }
       writeFileSync(
         `${lasdir}/installed.json`, // Save to installed apps file
         JSON.stringify({ installed }, null, 2)
       );
     }
-    rmdirSync(`${lasdir}/temp/`, { recursive: true, force: true }); // Clear temp folder
+    rmSync(`${lasdir}/temp/`, { recursive: true, force: true }); // Clear temp folder
     mkdirSync(`${lasdir}/temp/`); // Re-create temp folder
-    info("Returning to menu...");
-    win.loadFile("./src/html/index.html"); // Return to main menu
+    info("All operations complete");
+    win.loadFile("./src/html/main.html"); // Return to main menu
   });
-}
+};
 
 app.whenReady().then(() => {
   // When LAS has loaded...
   info("Creating window...");
   createWindow(); // ...create the window
+
   info("Started LAS");
 });
 
 app.on("window-all-closed", () => {
   // When all the windows are closed...
   info("Quitting LAS...");
-  rmdirSync(`${lasdir}/temp/`, { recursive: true, force: true }); // ...remove the temp folder...
+  rmSync(`${lasdir}/temp/`, { recursive: true, force: true }); // ...remove the temp folder...
   app.quit(); // ...and quit LAS
 });

@@ -7,8 +7,10 @@ window.getQueue.receive(function (_event, currqueue) {
     if (window.location.href.includes("info")) {
       if (currqueue.install) {
         for (let i = 0; i < currqueue.install.length; i++) {
-          if (currqueue.install[i] == window.localStorage.getItem("appId")) {
+          console.log(window.localStorage.getItem("appName"))
+          if (currqueue.install[i] == window.localStorage.getItem("appName")) {
             setTimeout(() => {
+              console.log("he");
               $("#get-button").html(
                 `<button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#queue-modal">Queued</button>`
               );
@@ -17,7 +19,7 @@ window.getQueue.receive(function (_event, currqueue) {
         }
       } else if (currqueue.remove) {
         for (let i = 0; i < currqueue.remove.length; i++) {
-          if (currqueue.remove[i] == window.localStorage.getItem("appId")) {
+          if (currqueue.remove[i] == window.localStorage.getItem("appName")) {
             setTimeout(() => {
               $("#get-button").html(
                 `<button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#queue-modal">Queued</button>`
@@ -26,7 +28,7 @@ window.getQueue.receive(function (_event, currqueue) {
           }
         }
       } else if (currqueue.update) {
-        if (currqueue.update[i] == window.localStorage.getItem("appId")) {
+        if (currqueue.update[i] == window.localStorage.getItem("appName")) {
           setTimeout(() => {
             $("#get-button").html(
               `<button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#queue-modal">Queued</button>`

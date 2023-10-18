@@ -29,6 +29,13 @@ The below list may not contain everything that was added, removed, changed, or f
 
 This section will be removed when the first alpha is available.
 
+### October 18, 2023
+#### IMPORTANT NOTICE
+This commit removes support for different sources. Now, LAS will get apps from the [Linux App Index](https://github.com/User8395/lai).
+
+This has been done to reduce the complexity of managing multiple sources and mitigates some security risks.
+
+
 ### August 4, 2023
 #### Fixed
 + Checking the info of another app shows info from the last app in `applist.json`
