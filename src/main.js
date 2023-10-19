@@ -15,6 +15,7 @@ const {
   appendFileSync,
 } = require("fs");
 const { execSync } = require("child_process");
+const { log } = require("console");
 const homedir = require("os").homedir()
 const lasdir = homedir + "/.las";
 
@@ -49,26 +50,29 @@ if (!existsSync(`${lasdir}`)) {
 function info(val) {
   // Information
   console.log(`[Server/INFO] ${val}`);
-  appendFileSync(`${lasdir}/log.txt`, `INFO ${val}\n`);
+  appendFileSync(`${lasdir}/log.txt`, `[Server/INFO] ${val}\n`);
 }
 function warn(val) {
   // Warning
   console.warn(`[Server/WARN] ${val}`);
-  appendFileSync(`${lasdir}/log.txt`, `WARN ${val}\n`);
+  appendFileSync(`${lasdir}/log.txt`, `[Server/WARN] ${val}\n`);
 }
 function error(val) {
   // Error
   console.error(`[Server/ERROR] ${val}`);
-  appendFileSync(`${lasdir}/log.txt`, `ERROR ${val}\n`);
+  appendFileSync(`${lasdir}/log.txt`, `[Server/ERROR] ${val}\n`);
+}
+
+info("Starting LAS v0.1.0...");
+
+// If the temp folder exists (usually stays after LAS is killed), delete it
+if (existsSync(`${lasdir}/temp`)) {
+  info("Temp folder exists, clearing...");
+  rmSync(`${lasdir}/temp`, { recursive: true, force: true })
 }
 
 mkdirSync(`${lasdir}/temp`); // Create temp folder
 
-info("Starting LAS v0.0.0...");
-warn("============================= WARNING ================================");
-warn("This is a development version of LAS.");
-warn("Please report bugs on GitHub at https://github.com/User8395/las/issues");
-warn("======================================================================");
 
 // Function to download files using `wget`
 function download(url) {
@@ -354,8 +358,18 @@ function createWindow() {
           info(`${queue.install[i]} (${app.latestVersion}) ${i + 1}/${queue.install.length}`)
           mkdirSync(`${lasdir}/apps/${queue.install[i]}`)
           renameSync(`${lasdir}/temp/${queue.install[i]}/app.json`, `${lasdir}/apps/${queue.install[i]}/app.json`)
+          info("(1/3) Extracting files...")
           execSync(`unzip ${lasdir}/temp/${queue.install[i]}.lapp.zip -d ${lasdir}/apps/${queue.install[i]}`)
+          info("(2/3) Linking desktop entry...")
           execSync(`ln -fs ${lasdir}/apps/${queue.install[i]}/${app.desktopFile} ${homedir}/.local/share/applications/${app.desktopFile}`)
+          info("(3/3) Setting executable permissions...")
+          execSync(`chmod +x ${lasdir}/apps/${queue.install[i]}/${app.desktopFile}`)
+          for (let i2 = 0; i2 < app.executables.length; i2++) {
+            console.log(`[Server/DEBUG] ${app.executables[i]}`);
+            console.log(`[Server/DEBUG] ${lasdir}/apps/${queue.install[i]}/${app.executables[i]}`);
+            execSync(`chmod +x ${lasdir}/apps/${queue.install[i]}/${app.executables[i]}`)
+          }
+          info("Install complete")
         }
         installed.push(queue.install[i])
       }
@@ -373,7 +387,6 @@ function createWindow() {
 
 app.whenReady().then(() => {
   // When LAS has loaded...
-  info("Creating window...");
   createWindow(); // ...create the window
 
   info("Started LAS");

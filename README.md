@@ -21,17 +21,28 @@ To launch LAS for testing, run
 npm run start
 ```
 
+To update LAS, run
+```
+git pull
+```
 
 ## Updates (bottom to top, top being latest and bottom being oldest)
 
 ### DISCLAIMER
 The below list may not contain everything that was added, removed, changed, or fixed on the date specified. All changes can be seen in the files' "Blame" section.
 
-This section will be removed when the first alpha is available.
+This section will be removed when the first release is available.
+
+### October 19, 2023
+#### IMPORTANT NOTICE
+This update marks the first packaged pre-release of LAS. New updates will be put into another branch.
+
+#### Added
++ Extra steps are now performed during app installation, such as linking the `.desktop` file and changing permissions of executables.
 
 ### October 18, 2023
 #### IMPORTANT NOTICE
-This commit removes support for different sources. Now, LAS will get apps from the [Linux App Index](https://github.com/User8395/lai).
+This update removes support for different sources. Now, LAS will get apps from the [Linux App Index](https://github.com/User8395/lai).
 
 This has been done to reduce the complexity of managing multiple sources and mitigates some security risks.
 
