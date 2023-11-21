@@ -1,5 +1,5 @@
 /*
-  Linux App Store v0.0-prealpha
+  Linux App Store v0.2.0
 */
 
 // Function Imports
@@ -15,7 +15,6 @@ const {
   appendFileSync,
 } = require("fs");
 const { execSync } = require("child_process");
-const { log } = require("console");
 const homedir = require("os").homedir()
 const lasdir = homedir + "/.las";
 
@@ -43,7 +42,6 @@ if (!existsSync(`${lasdir}`)) {
       2
     )
   );
-  writeFileSync(`${lasdir}/applist.json`, JSON.stringify({}, null, 2)); // Available apps JSON file
 }
 
 // Functions for logging to ~/.las/log.txt
@@ -63,26 +61,22 @@ function error(val) {
   appendFileSync(`${lasdir}/log.txt`, `[Server/ERROR] ${val}\n`);
 }
 
-info("Starting LAS v0.1.0...");
+info("Starting LAS v0.2.0...");
 
-// If the temp folder exists (usually stays after LAS is killed), delete it
+// If the temp folder exists (usually after LAS is killed), delete it
 if (existsSync(`${lasdir}/temp`)) {
-  info("Temp folder exists, clearing...");
   rmSync(`${lasdir}/temp`, { recursive: true, force: true })
 }
 
 mkdirSync(`${lasdir}/temp`); // Create temp folder
 
-
 // Function to download files using `wget`
 function download(url) {
-  info(`Downloading ${url}...`);
   try {
     execSync(`wget ${url} -P ${lasdir}/temp`, { stdio: "pipe", stderr: "out" });
   } catch (err) {
     error(err);
   }
-  info(`Download complete`)
 }
 
 // Creates the main window
@@ -178,11 +172,15 @@ function createWindow() {
 
   // Download the app index
   ipcMain.on("downloadIndex", () => {
-    info("Loading app index...");
+    info("Downloading app index...");
     let installed = JSON.parse(
       readFileSync(`${lasdir}/installed.json`)
     ).installed;
     download(`https://github.com/User8395/lai/raw/master/index.json`); // Download the app index file
+    info("Removing old app index")
+    try {
+      rmSync(`${lasdir}/index.json`)
+    } catch (err) { }
     info("Moving index file...");
     renameSync(
       `${lasdir}/temp/index.json`,
@@ -200,12 +198,12 @@ function createWindow() {
     var index = JSON.parse(readFileSync(`${lasdir}/index.json`)).apps
     rmSync(`${lasdir}/temp/`, { recursive: true, force: true }); // Remove temp folder
     mkdirSync(`${lasdir}/temp/`); // Re-create temp folder
+    writeFileSync(`${lasdir}/temp/queue.json`, JSON.stringify({ remove: [], install: [], update: [] }, null, 2)); // Create queue file
     win.webContents.send("index", index); // Tell renderer that index loading is done
   });
 
   // Get the info of an app
   ipcMain.on("getAppInfo", (_event, appName) => {
-    info(`Getting info of app ${appName}...`);
     let index = JSON.parse(readFileSync(`${lasdir}/index.json`)).apps; // Read app index
     let app; // Empty declaration
     for (let i = 0; i < index.length; i++) {
@@ -221,81 +219,33 @@ function createWindow() {
   // Add an app to the queue
   ipcMain.on("queueApp", (_event, appId, type) => {
     info(`Adding ${appId} to queue for ${type}...`);
-    if (existsSync(`${lasdir}/temp/queue.json`)) {
-      // If the queue file exists...
-      let queue = JSON.parse(readFileSync(`${lasdir}/temp/queue.json`)); // ...read the queue from ~/.las/temp/queue.json
-      if (type == "install") {
-        // If the app is supposed to be installed...
-        queue.install.push(appId); // ...add the app for installation
-      } else if (type == "remove") {
-        // If the app is supposed to be removed...
-        queue.remove.push(appId); // ...add the app for removal
-      } else if (type == "update") {
-        // If the app is supposed to be updated...
-        queue.update.push(appId); // ...add the app for update
-      }
-      writeFileSync(`${lasdir}/temp/queue.json`, JSON.stringify(queue))
-    } else {
-      // If the queue file doesn't exist...
-      if (type == "install") {
-        // ...and if the app is supposed to be installed...
-        writeFileSync(
-          // ...create the queue file and add the app for installation
-          `${lasdir}/temp/queue.json`,
-          JSON.stringify(
-            {
-              install: [appId],
-            },
-            null,
-            2
-          )
-        );
-      } else if (type == "remove") {
-        // ...and if the app is supposed to be removed...
-        writeFileSync(
-          // ...create the queue file and add the app for removal
-          `${lasdir}/temp/queue.json`,
-          JSON.stringify(
-            {
-              remove: [appId],
-            },
-            null,
-            2
-          )
-        );
-      } else if (type == "update") {
-        // If the app is supposed to be updated...
-        writeFileSync(
-          `${lasdir}/temp/queue.json`,
-          JSON.stringify(
-            // ...create the queue file and add the app for updating
-            {
-              update: [appId],
-            },
-            null,
-            2
-          )
-        );
-      }
+    // If the queue file exists...
+    let queue = JSON.parse(readFileSync(`${lasdir}/temp/queue.json`)); // ...read the queue from ~/.las/temp/queue.json
+    if (type == "install") {
+      // If the app is supposed to be installed...
+      queue.install.push(appId); // ...add the app for installation
+    } else if (type == "remove") {
+      // If the app is supposed to be removed...
+      queue.remove.push(appId); // ...add the app for removal
+    } else if (type == "update") {
+      // If the app is supposed to be updated...
+      queue.update.push(appId); // ...add the app for update
     }
+    writeFileSync(`${lasdir}/temp/queue.json`, JSON.stringify(queue))
   });
 
   // Retreive the current queue
   ipcMain.on("getQueue", (_event) => {
-    info("Getting queue...");
-    try {
-      let queue = JSON.parse(readFileSync(`${lasdir}/temp/queue.json`)); // Read the queue from ~/.las/temp/queue.json
-      win.webContents.send("queue", queue); // Send queue to renderer
-    } catch (err) {
-      // If there was an error
-      info("Queue is empty. Skipping...");
+    let queue = JSON.parse(readFileSync(`${lasdir}/temp/queue.json`)); // Read the queue from ~/.las/temp/queue.json
+    if (queue.remove.length == 0 && queue.install.length == 0 && queue.update.length == 0) { // If the queue is empty..
       win.webContents.send("queue", "empty"); // Tell renderer that the queue is empty
+    } else { // Otherwise...
+      win.webContents.send("queue", queue); // Send queue to renderer...
     }
   });
 
   // Retreive list of installed apps
   ipcMain.on("getInstalled", (_event) => {
-    info("Getting installed list...");
     let installed = JSON.parse(
       readFileSync(`${lasdir}/installed.json`) // Read installed apps file
     ).installed;
@@ -351,36 +301,37 @@ function createWindow() {
         var app = JSON.parse(readFileSync(`${lasdir}/temp/${queue.install[i]}/app.json`))
         download(`https://github.com/User8395/lai/raw/master/${queue.install[i]}/latest/${queue.install[i]}.lapp.zip`)
       }
-      info(`All downloads complete`)
+      info(`Downloads complete`)
+      info(`Installing apps...`)
       for (let i = 0; i < queue.install.length; i++) {
         var app = JSON.parse(readFileSync(`${lasdir}/temp/${queue.install[i]}/app.json`))
         if (app.install = "user") {
-          info(`${queue.install[i]} (${app.latestVersion}) ${i + 1}/${queue.install.length}`)
+          info(`[${i + 1}/${queue.install.length}] ${queue.install[i]} (${app.latestVersion})`)
           mkdirSync(`${lasdir}/apps/${queue.install[i]}`)
           renameSync(`${lasdir}/temp/${queue.install[i]}/app.json`, `${lasdir}/apps/${queue.install[i]}/app.json`)
-          info("(1/3) Extracting files...")
           execSync(`unzip ${lasdir}/temp/${queue.install[i]}.lapp.zip -d ${lasdir}/apps/${queue.install[i]}`)
-          info("(2/3) Linking desktop entry...")
           execSync(`ln -fs ${lasdir}/apps/${queue.install[i]}/${app.desktopFile} ${homedir}/.local/share/applications/${app.desktopFile}`)
-          info("(3/3) Setting executable permissions...")
-          execSync(`chmod +x ${lasdir}/apps/${queue.install[i]}/${app.desktopFile}`)
           for (let i2 = 0; i2 < app.executables.length; i2++) {
-            console.log(`[Server/DEBUG] ${app.executables[i]}`);
-            console.log(`[Server/DEBUG] ${lasdir}/apps/${queue.install[i]}/${app.executables[i]}`);
-            execSync(`chmod +x ${lasdir}/apps/${queue.install[i]}/${app.executables[i]}`)
+            console.debug(`[Server/DEBUG] ${app.executables}`)
+            try {
+              execSync(`chmod +x ${lasdir}/apps/${queue.install[i]}/${app.executables[i]}`)
+            } catch (err) {
+              error(err)
+            }
           }
-          info("Install complete")
         }
         installed.push(queue.install[i])
       }
+      info("Apps installed")
       writeFileSync(
         `${lasdir}/installed.json`, // Save to installed apps file
         JSON.stringify({ installed }, null, 2)
       );
     }
+    info("All operations complete");
     rmSync(`${lasdir}/temp/`, { recursive: true, force: true }); // Clear temp folder
     mkdirSync(`${lasdir}/temp/`); // Re-create temp folder
-    info("All operations complete");
+    writeFileSync(`${lasdir}/temp/queue.json`, JSON.stringify({ remove: [], install: [], update: [] }, null, 2)); // Create queue file
     win.loadFile("./src/html/main.html"); // Return to main menu
   });
 };
@@ -388,7 +339,6 @@ function createWindow() {
 app.whenReady().then(() => {
   // When LAS has loaded...
   createWindow(); // ...create the window
-
   info("Started LAS");
 });
 
